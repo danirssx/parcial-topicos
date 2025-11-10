@@ -5,43 +5,17 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Type definitions matching the actual database schema
-
-export type Cliente = {
-  id: string;
-  nombre_completo: string;
-  email: string;
-  direccion: string | null;
-  created_at: string;
-};
-
-export type Categoria = {
-  id: string;
-  nombre: string;
-};
-
-export type Empleado = {
-  id: string;
-  nombre_completo: string;
-  email: string;
-  categoria_id: string;
-  created_at: string;
-};
-
+// Type definitions matching the new simplified database schema
 export type Reclamo = {
   id: string;
-  cliente_id: string;
-  categoria_id: string | null;
-  asignado_a: string | null;
+  nombre_completo: string | null;
+  correo_cliente: string | null;
   descripcion: string;
   fecha_reclamo: string;
-  estado: "nuevo" | "pendiente" | "en_proceso" | "resuelto";
+  categoria: string | null;
+  estado: "nuevo" | "clasificado" | "asignado" | "en_progreso" | "resuelto" | "cerrado";
   created_at: string;
 };
 
-// Extended type with joined data for display
-export type ReclamoConRelaciones = Reclamo & {
-  cliente: Cliente;
-  categoria: Categoria | null;
-  empleado: Empleado | null;
-};
+// Alias for backward compatibility
+export type ReclamoConRelaciones = Reclamo;

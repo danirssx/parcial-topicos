@@ -33,9 +33,9 @@ async function getStats() {
     }
   }
   const total = reclamos.length;
-  const pendientes = reclamos.filter((r) => r.estado === "pendiente").length;
-  const resueltos = reclamos.filter((r) => r.estado === "resuelto").length;
-  const enProceso = reclamos.filter((r) => r.estado === "en_proceso").length;
+  const nuevos = reclamos.filter((r) => r.estado === "nuevo" || r.estado === "clasificado").length;
+  const resueltos = reclamos.filter((r) => r.estado === "resuelto" || r.estado === "cerrado").length;
+  const enProceso = reclamos.filter((r) => r.estado === "en_progreso" || r.estado === "asignado").length;
 
   // Get last 7 days for the chart
   const today = new Date();
@@ -65,7 +65,7 @@ async function getStats() {
     };
   });
 
-  return { total, pendientes, resueltos, enProceso, reclamosRecientes };
+  return { total, nuevos, resueltos, enProceso, reclamosRecientes };
 }
 
 export default async function DashboardPage() {
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
                 Estado de Reclamos
               </h3>
               <div className="space-y-3">
-                {/* Pendientes */}
+                {/* Nuevos */}
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-yellow-50 to-yellow-50/50 border border-yellow-200/60 hover:shadow-sm transition-all">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center flex-shrink-0 shadow-sm">
                     <svg
@@ -277,7 +277,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-600 font-semibold mb-0.5">
-                      {stats.pendientes} Pendientes
+                      {stats.nuevos} Nuevos
                     </p>
                     <p className="text-sm font-bold text-gray-900 p-4">
                       Requieren atención

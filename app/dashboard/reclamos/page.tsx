@@ -27,21 +27,27 @@ async function getReclamos(): Promise<ReclamoConRelaciones[]> {
 
 function getEstadoBadge(estado: string) {
   const styles = {
-    pendiente: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    en_proceso: "bg-blue-50 text-blue-700 border-blue-200",
+    nuevo: "bg-purple-50 text-purple-700 border-purple-200",
+    clasificado: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    asignado: "bg-blue-50 text-blue-700 border-blue-200",
+    en_progreso: "bg-yellow-50 text-yellow-700 border-yellow-200",
     resuelto: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    cerrado: "bg-gray-50 text-gray-700 border-gray-200",
   };
 
   const labels = {
-    pendiente: "Pendiente",
-    en_proceso: "En Proceso",
+    nuevo: "Nuevo",
+    clasificado: "Clasificado",
+    asignado: "Asignado",
+    en_progreso: "En Progreso",
     resuelto: "Resuelto",
+    cerrado: "Cerrado",
   };
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${
-        styles[estado as keyof typeof styles] || styles.pendiente
+        styles[estado as keyof typeof styles] || styles.nuevo
       }`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -132,10 +138,10 @@ export default async function ReclamosPage() {
             </div>
             <div>
               <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">
-                Pendientes
+                Nuevos
               </p>
               <p className="text-2xl font-bold text-yellow-600">
-                {reclamos.filter((r) => r.estado === "pendiente").length}
+                {reclamos.filter((r) => r.estado === "nuevo").length}
               </p>
             </div>
           </div>
@@ -160,10 +166,10 @@ export default async function ReclamosPage() {
             </div>
             <div>
               <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">
-                En Proceso
+                En Progreso
               </p>
               <p className="text-2xl font-bold text-blue-600">
-                {reclamos.filter((r) => r.estado === "en_proceso").length}
+                {reclamos.filter((r) => r.estado === "en_progreso").length}
               </p>
             </div>
           </div>
@@ -300,16 +306,16 @@ export default async function ReclamosPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
-                          {reclamo.cliente?.nombre_completo
+                          {reclamo.nombre_completo
                             ?.charAt(0)
                             .toUpperCase() || "?"}
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {reclamo.cliente?.nombre_completo || "Sin nombre"}
+                            {reclamo.nombre_completo || "Sin nombre"}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
-                            {reclamo.cliente?.email || "Sin email"}
+                            {reclamo.correo_cliente || "Sin email"}
                           </p>
                         </div>
                       </div>
