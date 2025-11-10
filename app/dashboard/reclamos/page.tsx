@@ -1,18 +1,28 @@
-import { supabase } from "@/lib/supabaseClient";
-import type { Reclamo } from "@/lib/supabaseClient";
+import type { ReclamoConRelaciones } from "@/lib/supabaseClient";
+import { mockReclamos } from "@/lib/mock/reclamos";
+import { getAllReclamos } from "@/lib/db";
 
-async function getReclamos() {
-  const { data, error } = await supabase
-    .from("reclamos")
-    .select("*")
-    .order("created_at", { ascending: false });
+async function getReclamos(): Promise<ReclamoConRelaciones[]> {
+  // Using mock data for testing while database is being built
+  const USE_MOCK_DATA = false; // Set to true to use mock data
 
-  if (error) {
-    console.error("Error fetching reclamos:", error);
-    return [];
+  if (USE_MOCK_DATA) {
+    console.log("📋 [Reclamos List] Using mock data");
+    return mockReclamos;
   }
 
-  return (data as Reclamo[]) || [];
+  try {
+    console.log("📋 [Reclamos List] Fetching from PostgreSQL with JOINs...");
+    const reclamos = await getAllReclamos();
+
+    console.log(`✅ [Reclamos List] Successfully fetched ${reclamos.length} reclamos`);
+    console.log("✅ [Reclamos List] Sample data:", JSON.stringify(reclamos[0], null, 2));
+
+    return reclamos;
+  } catch (error) {
+    console.error("❌ [Reclamos List] Error fetching reclamos:", error);
+    return [];
+  }
 }
 
 function getEstadoBadge(estado: string) {
@@ -44,20 +54,20 @@ export default async function ReclamosPage() {
   const reclamos = await getReclamos();
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 sm:p-8 lg:p-10 space-y-8 max-w-[1400px] mx-auto">
       {/* Header */}
-      <header className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold text-gray-900">
+      <header className="flex items-center justify-between gap-4">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
             Todos los Reclamos
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-600 font-medium">
             Gestiona y revisa todos los reclamos del sistema
           </p>
         </div>
-        <button className="px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl transition-colors flex items-center gap-2">
+        {/*<button className="px-6 py-3.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 active:scale-95 whitespace-nowrap">
           <svg
-            className="w-4 h-4"
+            className="w-5 h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -70,16 +80,16 @@ export default async function ReclamosPage() {
             />
           </svg>
           Nuevo Reclamo
-        </button>
+        </button>*/}
       </header>
 
       {/* Stats Summary */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="group bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center shadow-sm">
               <svg
-                className="w-5 h-5 text-gray-600"
+                className="w-6 h-6 text-gray-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -93,19 +103,21 @@ export default async function ReclamosPage() {
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Total</p>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">
+                Total
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
                 {reclamos.length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+        <div className="group bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center shadow-sm">
               <svg
-                className="w-5 h-5 text-yellow-600"
+                className="w-6 h-6 text-yellow-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -119,19 +131,21 @@ export default async function ReclamosPage() {
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Pendientes</p>
-              <p className="text-xl font-bold text-yellow-600">
+              <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">
+                Pendientes
+              </p>
+              <p className="text-2xl font-bold text-yellow-600">
                 {reclamos.filter((r) => r.estado === "pendiente").length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+        <div className="group bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center shadow-sm">
               <svg
-                className="w-5 h-5 text-blue-600"
+                className="w-6 h-6 text-blue-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -145,19 +159,21 @@ export default async function ReclamosPage() {
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">En Proceso</p>
-              <p className="text-xl font-bold text-blue-600">
+              <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">
+                En Proceso
+              </p>
+              <p className="text-2xl font-bold text-blue-600">
                 {reclamos.filter((r) => r.estado === "en_proceso").length}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+        <div className="group bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center shadow-sm">
               <svg
-                className="w-5 h-5 text-emerald-600"
+                className="w-6 h-6 text-emerald-700"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -171,8 +187,10 @@ export default async function ReclamosPage() {
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Resueltos</p>
-              <p className="text-xl font-bold text-emerald-600">
+              <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">
+                Resueltos
+              </p>
+              <p className="text-2xl font-bold text-emerald-600">
                 {reclamos.filter((r) => r.estado === "resuelto").length}
               </p>
             </div>
@@ -181,18 +199,18 @@ export default async function ReclamosPage() {
       </div>
 
       {/* Reclamos Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-lg overflow-hidden transition-all duration-300">
         {/* Table Header with Search */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="p-6 border-b border-gray-200/80 flex items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <input
               type="search"
               placeholder="Buscar por cliente, email o descripción..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:bg-white transition-all"
               disabled
             />
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -206,7 +224,7 @@ export default async function ReclamosPage() {
             </svg>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+            <button className="p-2.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -225,10 +243,10 @@ export default async function ReclamosPage() {
         </div>
 
         {reclamos.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+          <div className="p-16 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 mb-6 shadow-sm">
               <svg
-                className="w-8 h-8 text-gray-400"
+                className="w-10 h-10 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -241,56 +259,57 @@ export default async function ReclamosPage() {
                 />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-gray-900 mb-3">
               No hay reclamos
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-600 font-medium mb-6 max-w-sm mx-auto">
               Los reclamos aparecerán aquí cuando sean enviados al sistema
             </p>
-            <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors">
+            <button className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95">
               Crear primer reclamo
             </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     Cliente
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     Descripción
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     Fecha Reclamo
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-gray-100 bg-white">
                 {reclamos.map((reclamo) => (
                   <tr
                     key={reclamo.id}
-                    className="hover:bg-gray-50 transition-colors"
+                    className="hover:bg-gray-50/50 transition-all group"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
-                          {reclamo.nombre_cliente?.charAt(0).toUpperCase() ||
-                            "?"}
+                          {reclamo.cliente?.nombre_completo
+                            ?.charAt(0)
+                            .toUpperCase() || "?"}
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {reclamo.nombre_cliente || "Sin nombre"}
+                            {reclamo.cliente?.nombre_completo || "Sin nombre"}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
-                            {reclamo.email || "Sin email"}
+                            {reclamo.cliente?.email || "Sin email"}
                           </p>
                         </div>
                       </div>
@@ -333,7 +352,7 @@ export default async function ReclamosPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
-                          className="p-2 rounded-lg text-gray-400 hover:text-orange-600 hover:bg-orange-50 transition-colors"
+                          className="p-2.5 rounded-xl text-gray-400 hover:text-orange-600 hover:bg-orange-50 transition-all active:scale-95 shadow-sm hover:shadow"
                           title="Ver detalles"
                         >
                           <svg
@@ -357,7 +376,7 @@ export default async function ReclamosPage() {
                           </svg>
                         </button>
                         <button
-                          className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                          className="p-2.5 rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all active:scale-95 shadow-sm hover:shadow"
                           title="Editar"
                         >
                           <svg
@@ -375,7 +394,7 @@ export default async function ReclamosPage() {
                           </svg>
                         </button>
                         <button
-                          className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                          className="p-2.5 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-95 shadow-sm hover:shadow"
                           title="Eliminar"
                         >
                           <svg
@@ -404,21 +423,21 @@ export default async function ReclamosPage() {
 
       {/* Pagination */}
       {reclamos.length > 0 && (
-        <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-          <p className="text-sm text-gray-600">
+        <div className="flex items-center justify-between bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-lg transition-all duration-300">
+          <p className="text-sm text-gray-600 font-medium">
             Mostrando{" "}
-            <span className="font-medium text-gray-900">{reclamos.length}</span>{" "}
+            <span className="font-bold text-gray-900">{reclamos.length}</span>{" "}
             reclamo{reclamos.length !== 1 ? "s" : ""}
           </p>
           <div className="flex items-center gap-2">
             <button
-              className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 text-sm font-bold hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               disabled
             >
               Anterior
             </button>
             <button
-              className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 text-sm font-bold hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               disabled
             >
               Siguiente
