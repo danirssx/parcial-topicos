@@ -15,8 +15,13 @@ async function getReclamos(): Promise<ReclamoConRelaciones[]> {
     console.log("📋 [Reclamos List] Fetching from PostgreSQL with JOINs...");
     const reclamos = await getAllReclamos();
 
-    console.log(`✅ [Reclamos List] Successfully fetched ${reclamos.length} reclamos`);
-    console.log("✅ [Reclamos List] Sample data:", JSON.stringify(reclamos[0], null, 2));
+    console.log(
+      `✅ [Reclamos List] Successfully fetched ${reclamos.length} reclamos`,
+    );
+    console.log(
+      "✅ [Reclamos List] Sample data:",
+      JSON.stringify(reclamos[0], null, 2),
+    );
 
     return reclamos;
   } catch (error) {
@@ -90,7 +95,7 @@ export default async function ReclamosPage() {
       </header>
 
       {/* Stats Summary */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-2">
         <div className="group bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center shadow-sm">
@@ -142,62 +147,6 @@ export default async function ReclamosPage() {
               </p>
               <p className="text-2xl font-bold text-yellow-600">
                 {reclamos.filter((r) => r.estado === "nuevo").length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="group bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center shadow-sm">
-              <svg
-                className="w-6 h-6 text-blue-700"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">
-                En Progreso
-              </p>
-              <p className="text-2xl font-bold text-blue-600">
-                {reclamos.filter((r) => r.estado === "en_progreso").length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="group bg-white rounded-2xl border border-gray-200/80 p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center shadow-sm">
-              <svg
-                className="w-6 h-6 text-emerald-700"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 font-bold uppercase tracking-wide mb-1">
-                Resueltos
-              </p>
-              <p className="text-2xl font-bold text-emerald-600">
-                {reclamos.filter((r) => r.estado === "resuelto").length}
               </p>
             </div>
           </div>
@@ -306,9 +255,8 @@ export default async function ReclamosPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
-                          {reclamo.nombre_completo
-                            ?.charAt(0)
-                            .toUpperCase() || "?"}
+                          {reclamo.nombre_completo?.charAt(0).toUpperCase() ||
+                            "?"}
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
